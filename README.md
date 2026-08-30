@@ -30,14 +30,18 @@ A small Python utility that takes a `.docx` file, strips out repetitive headers/
 
 ## How It Works
 
-The script (`optimize_for_ia.py`) does the following:
+The script (`optimize_for_ai.py`) does the following:
 
-1. Opens the input `.docx` with `python-docx`.
-2. Clears the text of every header and footer in every section (these usually contain page numbers, logos, or repeated boilerplate that adds no value for an AI).
-3. Saves a temporary cleaned copy.
-4. Converts that copy using `markitdown` into structured Markdown text.
-5. Writes the result to two files next to the original: `<name>.md` and `<name>.txt`.
-6. Deletes the temporary file.
+1. Resolves the input path (expands `~` and turns it into an absolute path). If the given filename doesn't exist in the current directory, it automatically also looks for it in `~/Documents` and `~/Downloads` — so you can run the script from anywhere and just pass the file name, without typing the full path, as long as the file lives in one of those two folders.
+2. Opens the resolved `.docx` with `python-docx`.
+3. Clears the text of every header and footer in every section (these usually contain page numbers, logos, or repeated boilerplate that adds no value for an AI).
+4. Saves a temporary cleaned copy.
+5. Converts that copy using `markitdown` into structured Markdown text.
+6. Writes the **`.md`** file with the full Markdown structure intact — headings, tables, bold text, links, etc. Use this when the AI needs to understand hierarchy or table relationships.
+7. Strips all Markdown syntax (`#`, `**`, `|`, list markers, link URLs, horizontal rules, blockquote markers, extra blank lines...) and writes the result as **`.txt`** — real plain text with only the informational content, no formatting overhead. This is the cheapest format in tokens; use it when only the content matters, not the structure.
+8. Deletes the temporary file and prints a character-count comparison between `.md` and `.txt` so you can see the actual token savings.
+
+> 💡 **Tip:** If your file isn't in the current folder, `Documents`, or `Downloads`, just pass the full path instead of only the filename, e.g. `python optimize_for_ai.py C:\Users\me\Desktop\report.docx` (Windows) or `python3 optimize_for_ai.py ~/Desktop/report.docx` (Linux).
 
 ---
 
@@ -61,7 +65,6 @@ Clone or download this repository first:
 ```bash
 git clone https://github.com/YamitGC/optimize_for_ai.git
 cd optimize_for_ai
-
 ```
 
 ### 🪟 Windows
@@ -97,7 +100,7 @@ cd optimize_for_ai
 
 5. **Run the script**
    ```powershell
-   python optimize_for_ia.py mi_documento.docx
+   python optimize_for_ai.py mi_documento.docx
    ```
 
 6. **(Optional) Deactivate the virtual environment when done**
@@ -123,7 +126,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
-python3 optimize_for_ia.py mi_documento.docx
+python3 optimize_for_ai.py mi_documento.docx
 ```
 
 #### Linux Mint
@@ -138,7 +141,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
-python3 optimize_for_ia.py mi_documento.docx
+python3 optimize_for_ai.py mi_documento.docx
 ```
 
 #### Fedora
@@ -152,7 +155,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
-python3 optimize_for_ia.py mi_documento.docx
+python3 optimize_for_ai.py mi_documento.docx
 ```
 
 #### Arch Linux / Manjaro
@@ -166,7 +169,7 @@ python -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
-python optimize_for_ia.py mi_documento.docx
+python optimize_for_ai.py mi_documento.docx
 ```
 
 > ⚠️ Arch is a rolling-release distro with very new Python versions. If `markitdown` or `python-docx` throws a compatibility error, check the [Troubleshooting](#troubleshooting) section for the `--break-system-packages` note or pin dependency versions in `requirements.txt`.
@@ -178,10 +181,16 @@ python optimize_for_ia.py mi_documento.docx
 Once dependencies are installed (and your virtual environment is activated, if you created one):
 
 ```bash
-python optimize_for_ia.py path/to/document.docx
+python optimize_for_ai.py path/to/document.docx
 ```
 
-This generates, in the same folder as the input file:
+You can also just pass the filename (no path) if the file is in your current folder, `Documents`, or `Downloads` — the script will find it automatically:
+
+```bash
+python optimize_for_ai.py my_report.docx
+```
+
+This generates, in the same folder where the input file was found:
 
 - `document.md`
 - `document.txt`
@@ -191,13 +200,17 @@ This generates, in the same folder as the input file:
 ## Output Example
 
 ```
-Limpiando el documento (eliminando encabezados y pies de página)...
-Convirtiendo a Markdown optimizado...
+Procesando: /home/user/Documents/document.docx
+Limpiando el documento...
+Convirtiendo a formatos para IA...
 
-¡Listo! Se han generado dos archivos optimizados para IA:
- 1. Markdown (mantiene jerarquía de títulos y tablas): document.md
- 2. Texto Plano (mínimo consumo de tokens): document.txt
+¡Listo! Archivos generados en /home/user/Documents:
+ - document.md  (19,000 caracteres, con formato Markdown)
+ - document.txt  (16,800 caracteres, texto plano)
+   Reducción de caracteres del .txt frente al .md: 11.6%
 ```
+
+> Note: console messages are printed in Spanish regardless of your system language, since that's how the script was written. Actual percentages vary depending on how much Markdown formatting (tables, headings, bold text, links) the source document contains.
 
 ---
 
@@ -213,6 +226,7 @@ Convirtiendo a Markdown optimizado...
 | `PermissionError` when saving output files | The `.docx` (or the output folder) is open in Word or is read-only | Close the file in any other program and check folder write permissions |
 | PowerShell won't run `venv\Scripts\activate` | Execution policy restriction | Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` in an elevated PowerShell |
 | `pip` installs succeed but script still fails on Fedora/Arch after a system update | System Python got upgraded and broke the venv | Delete the `venv` folder and recreate it (`rm -rf venv && python3 -m venv venv`) |
+| `Error: No se encontró '<file>' en el directorio actual, ni en Documents ni en Downloads` | You typed a filename that isn't in the current folder, `~/Documents`, or `~/Downloads` | Double-check the spelling/extension, move the file into one of those folders, or pass the full path instead (e.g. `~/Desktop/file.docx`) |
 
 ---
 
@@ -220,7 +234,7 @@ Convirtiendo a Markdown optimizado...
 
 ```
 .
-├── optimize_for_ia.py     # Main conversion script
+├── optimize_for_ai.py     # Main conversion script
 ├── requirements.txt       # Python dependencies
 ├── README.md               # This file (English)
 ├── README.es.md            # Spanish version
