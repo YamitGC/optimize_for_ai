@@ -62,8 +62,8 @@ El script (`optimize_for_ai.py`) hace lo siguiente:
 Primero clona o descarga este repositorio:
 
 ```bash
-git clone https://github.com/<tu-usuario>/<tu-repo>.git
-cd <tu-repo>
+git clone https://github.com/YamitGC/optimize_for_ai.git
+cd optimize_for_ai
 ```
 
 ### 🪟 Windows
