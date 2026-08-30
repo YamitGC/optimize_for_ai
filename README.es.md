@@ -37,8 +37,9 @@ El script (`optimize_for_ai.py`) hace lo siguiente:
 3. Borra el texto de todos los encabezados y pies de página de cada sección (normalmente contienen números de página, logos u otro texto repetido que no aporta valor a una IA).
 4. Guarda una copia temporal ya "limpia".
 5. Convierte esa copia con `markitdown` a texto Markdown estructurado.
-6. Escribe el resultado en dos archivos junto al original: `<nombre>.md` y `<nombre>.txt`.
-7. Elimina el archivo temporal.
+6. Escribe el archivo **`.md`** con la estructura Markdown completa intacta — títulos, tablas, negritas, enlaces, etc. Úsalo cuando la IA necesite entender jerarquía o relaciones dentro de tablas.
+7. Elimina toda la sintaxis Markdown (`#`, `**`, `|`, marcadores de lista, URLs de enlaces, líneas horizontales, comillas de cita, saltos de línea de sobra...) y guarda el resultado como **`.txt`** — texto plano real, con solo el contenido informativo, sin peso de formato. Este es el formato más barato en tokens; úsalo cuando solo importa el contenido, no la estructura.
+8. Elimina el archivo temporal e imprime una comparación de cantidad de caracteres entre `.md` y `.txt` para que veas el ahorro real de tokens.
 
 > 💡 **Consejo:** Si tu archivo no está en la carpeta actual, en `Documents` ni en `Downloads`, simplemente pasa la ruta completa en lugar de solo el nombre, por ejemplo: `python optimize_for_ai.py C:\Users\yo\Desktop\informe.docx` (Windows) o `python3 optimize_for_ai.py ~/Desktop/informe.docx` (Linux).
 
@@ -204,9 +205,12 @@ Limpiando el documento...
 Convirtiendo a formatos para IA...
 
 ¡Listo! Archivos generados en /home/usuario/Documents:
- - documento.md
- - documento.txt
+ - documento.md  (19,000 caracteres, con formato Markdown)
+ - documento.txt  (16,800 caracteres, texto plano)
+   Reducción de caracteres del .txt frente al .md: 11.6%
 ```
+
+> Los porcentajes reales varían según cuánto formato Markdown (tablas, títulos, negritas, enlaces) tenga el documento original.
 
 ---
 
