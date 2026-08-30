@@ -2,7 +2,7 @@
 
 > ⚠️ **Nota importante:** Esta es una traducción **no oficial**, provista únicamente con fines informativos y de accesibilidad. El **texto legalmente vinculante** es la versión en inglés disponible en [`LICENSE.md`](LICENSE.md). En caso de cualquier discrepancia o conflicto entre ambas versiones, prevalece siempre la versión en inglés.
 
-Copyright (c) 2026 <tu-nombre-u-organización>
+Copyright (c) 2026 YamitGC
 
 Por la presente se concede permiso, de forma gratuita, a cualquier persona que obtenga una copia
 de este software y de los archivos de documentación asociados (el "Software"), para utilizar
